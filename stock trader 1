@@ -1,0 +1,29 @@
+from jqdata import *
+
+# 初始化函数，设定基准等等
+def initialize(context):
+    g.takeprice = ['000001.XSHE','300033.XSHE','600519.XSHG','000799.XSHE']
+    print(g.takeprice)
+    
+def handle_data(context,data):
+    pingan = g.takeprice[3]
+    close_data = attribute_history(pingan,1,'1d',['close'])
+    close_data5 = attribute_history(pingan,5,'1d',['close'])
+    close_data10 = attribute_history(pingan,10,'1d',['close'])
+    close_data20 = attribute_history(pingan,20,'1d',['close'])
+    close_data60 = attribute_history(pingan,60,'1d',['close'])
+    MINMA5 = close_data5['close'].mean()
+    MINMA10 = close_data10['close'].mean()
+    MINMA20 = close_data20['close'].mean()
+    MINMA60 = close_data60['close'].mean()
+    current_price = close_data['close'][-1]
+    cash = context.portfolio.available_cash
+    position_value = context.portfolio.positions_value
+    
+    if current_price < MINMA10  :
+        order_value(pingan,-10000000)
+        log.info("selling %s" % (pingan))
+    
+    if current_price > MINMA10 and MINMA10 > MINMA20 and MINMA20 > MINMA60  :
+        order_value(pingan,10000000)
+        log.info("buying %s" % (pingan))
